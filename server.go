@@ -6,10 +6,16 @@ import (
   "log"
   "io/ioutil"
   "html/template"
+  "strings"
 )
 
 type DogImg struct {
   Image string `json:"message"`
+}
+
+type DogData struct {
+  Name string
+  DogImage string
 }
 
 func GetImg(w http.ResponseWriter, r *http.Request) {
@@ -25,9 +31,22 @@ func GetImg(w http.ResponseWriter, r *http.Request) {
     panic(errData)
   }
 
-  var dogData DogImg
+  var dogImage DogImg
 
-  json.Unmarshal(responseData, &dogData)
+  json.Unmarshal(responseData, &dogImage)
+
+  var dogData DogData
+
+  nameStartPos := strings.Index(dogImage.Image, "breeds/") + 7
+
+  nameEndPos := strings.LastIndex(dogImage.Image, "/")
+
+  nameOfDog := dogImage.Image[nameStartPos:nameEndPos]
+
+  dogData = DogData {
+    Name: nameOfDog,
+    DogImage: dogImage.Image,
+  }
 
   tmp := template.Must(template.ParseFiles("index.html"))
 
